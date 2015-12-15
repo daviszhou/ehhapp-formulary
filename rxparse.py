@@ -337,6 +337,9 @@ def formulary_update(formulary, pricetable):
                 invcost = ir.COST.lower()
                 itemnum = ir.ITEMNUM
 
+                # check if formulary medication as any matches in pricetable
+                has_match = False
+
                 # If the name and dose are a subset of the pricetable key then we have a match
                 if re.search(dname, invnamedose): # capture edge cases
                     if match_string(dname, invnamedose):
@@ -345,9 +348,9 @@ def formulary_update(formulary, pricetable):
                         
                         if dosepatt.search(invnamedose):
 
-                            match = True
                             mcount += 1
-                            
+                            has_match = True
+
                             if price_disc(dcost, invcost):
                                 pricechanges += 1
                                 record.PRICETABLE[k] = v._replace(COST = invcost, ITEMNUM = itemnum)
@@ -366,12 +369,14 @@ def formulary_update(formulary, pricetable):
                                 user_input = input('Please try again. Are these the same medication?\nPlease type \'y\' or \'n\': ') # error check for user input
 
                             if user_input == 'y':
-                                match = True
                                 mcount += 1
                                 record.PRICETABLE[k] = v._replace(COST = invcost, ITEMNUM = itemnum)
                             elif user_input == 'n':
                                 print('This medication price will not be changed.')
-    
+                    
+            if has_match == False:
+                print(dname+' '+ddose+'has no matches')
+
     return mcount, pricechanges, formulary, smatchcount
 
 """
